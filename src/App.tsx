@@ -1,26 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './App.scss';
+import {Route,Switch} from 'react-router-dom'
+import HomePage from './HomePage'
+import ShopPage from './ShopPage'
+import Header from './Header'
+import SignInSignUp from './SignInSignUp'
+import {auth} from './firebase/FireBaseUtiils'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component{
+
+  constructor(props:{}){
+    super(props);
+    this.state = {currentUser:null}
+  }
+
+  umsubscribeFromAuth:any = null;
+
+  componentDidMount(){
+    this.umsubscribeFromAuth = auth.onAuthStateChanged((user)=>{
+      this.setState({currentUser:user})
+      alert(user?.displayName)
+    })
+  }
+
+  componentWillUnmount(){
+    this.umsubscribeFromAuth()
+  }
+
+  render() {
+    return (
+      <div>
+        <Header/>
+        <Switch>
+          <Route exact path='/' component={HomePage}/>
+          <Route exact path='/shop' component={ShopPage}/>
+          <Route exact path='/signin' component={SignInSignUp}/>
+        </Switch>
+      </div>
+    );
+  }
 }
+
 
 export default App;
