@@ -23,3 +23,24 @@ provider.setCustomParameters({prompt:'select_account'})
 export const signInWithGoogle = () => auth.signInWithPopup(provider)
 
 export default firebase;
+
+export async function addUserToDatabase(authData:firebase.User|null, addtionalData:any){
+  if(!authData) return;
+  const userRef = firestore.doc(`users/${authData.uid}`);
+  const userSnap = await userRef.get()
+  // if(!userSnap.exists){
+    const { email, displayName, phoneNumber} = authData
+    const timestamp = new Date()
+    userRef.set({
+      email,
+      displayName,
+      phoneNumber,
+      timestamp,
+      ...addtionalData
+    })
+  // }
+  console.log('authData :>> ', authData);
+  console.log('userSnap :>> ', userSnap);
+
+  return userRef;
+}

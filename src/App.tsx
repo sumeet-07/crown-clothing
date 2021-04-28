@@ -5,9 +5,9 @@ import HomePage from './HomePage'
 import ShopPage from './ShopPage'
 import Header from './Header'
 import SignInSignUp from './SignInSignUp'
-import {auth} from './firebase/FireBaseUtiils'
+import {auth, addUserToDatabase} from './firebase/FireBaseUtiils'
 
-class App extends React.Component{
+class App extends React.Component<any,any>{
 
   constructor(props:{}){
     super(props);
@@ -17,9 +17,18 @@ class App extends React.Component{
   umsubscribeFromAuth:any = null;
 
   componentDidMount(){
-    this.umsubscribeFromAuth = auth.onAuthStateChanged((user)=>{
-      this.setState({currentUser:user})
-      alert(user?.displayName)
+    this.umsubscribeFromAuth = auth.onAuthStateChanged(async (user)=>{
+      if(user){
+        const userRef = await addUserToDatabase(user,{});
+        userRef?.onSnapshot(snapshot=>{
+          this.setState({currentUser:{
+            id:snapshot.id,
+            ...snapshot.data()
+          }}, () => console.log('this.state :>> ', this.state));
+        })
+      }else{
+        this.setState({currentUser:null})
+      }
     })
   }
 
@@ -27,10 +36,10 @@ class App extends React.Component{
     this.umsubscribeFromAuth()
   }
 
-  render() {
+  render=()=> {
     return (
       <div>
-        <Header/>
+        <Header user={this.state.currentUser} />
         <Switch>
           <Route exact path='/' component={HomePage}/>
           <Route exact path='/shop' component={ShopPage}/>
